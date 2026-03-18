@@ -1,0 +1,34 @@
+name: debug-runner
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  debug:
+    if: ${{ github.repository != 'fox3000foxy/repo-to-vps' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Cache & install APT packages (tmate + watcher)
+        uses: awalsh128/cache-apt-pkgs-action@v1.6.0
+        with:
+          packages: tmate inotify-tools
+
+      - name: Start tmate session + autosave to branch "filesystem"
+        run: |
+          bash .github/scripts/start-tmate.sh
